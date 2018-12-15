@@ -260,3 +260,5 @@ paket-files/
 __pycache__/
 *.pyc
 /trains.txt
+/AspNetDemo/stations.txt
+/AspNetDemo/stationsback.txt

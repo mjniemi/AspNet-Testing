@@ -17,62 +17,79 @@ namespace AspNetDemo.Controllers
     {
         // GET: /<controller>/
         [HttpGet("[action]")]
-        public string GetTrainData(string stationCode)
+        public List<Train> GetTrainData(string station)
         {
-
-            stationCode = "HKI";
-            string fixedUrl = "https://rata.digitraffic.fi/api/v1/live-trains/station/"
-                + stationCode + "?arriving_trains=1&departing_trains=1&include_nonstopping=false";
+            if (station == null || station == "")
+            {
+                station = "AIN";
+            }
+            string apiUrl = "https://rata.digitraffic.fi/api/v1/live-trains/station/"
+                + station + "?arriving_trains=0&arrived_trains=0&departed_trains=0&departing_trains=3&include_nonstopping=false";
             // Returns JSON string
 
-            //string data = GetTrains(fixedUrl);
-            string data = "";
-            StringBuilder sb = new StringBuilder();
-            try
+            string data = GetTrains(apiUrl);
+
+            List<TrainData> TypedData = JsonConvert.DeserializeObject<List<TrainData>>(data);
+
+            List<Train> parsedData = ParseTrainData(TypedData);
+
+            return parsedData;
+
+        }
+
+        private List<Train> ParseTrainData (List<TrainData> trains)
+        {
+            List<Train> parsedData = new List<Train>();
+            Models.AspNetDemoDBContext con = new Models.AspNetDemoDBContext();
+
+            foreach (TrainData train in trains)
             {
-                //FileStream fs = new FileStream(@"E:\bootcamp\AspNetDemo\t.txt", FileMode.Open);
-
-                //long len = fs.Length;
-                //byte[] buffer = new byte[len];
-
-                //int count;                            // actual number of bytes read
-                //int sum = 0;                          // total number of bytes read
-
-                //// read until Read method returns 0 (end of the stream has been reached)
-                //while ((count = fs.Read(buffer, sum, (int)len - sum)) > 0)
-                //    sum += count;  // sum is a buffer offset for next reading
-                //StringBuilder sb = new StringBuilder();
-
-                //for (int i = 0; i < buffer.Length; i++)
-                //{
-                //    sb.Append(buffer[i].ToString());
-                //}
-                //data = sb.ToString();
-
-                //fs.Dispose();
-
-                using (StreamReader sr = new StreamReader(@"t.txt"))
+                Train newTrain = new Train
                 {
-                    // Read the stream to a string, and write the string to the console.
-                    //String line = sr.ReadToEnd();
-                    //Console.WriteLine(line);
-                    sb.Append(sr.ReadToEnd());
+                    TrainNumber = train.trainNumber,
+                    TrainType = train.trainType,
+                    TrainCategory = train.trainCategory,
+                    Cancelled = train.cancelled,
+                };
+
+                TrainTravelData[] NewTable = train.timetableRows;
+                List<Timetable> NewTableList = new List<Timetable>();
+                foreach (TrainTravelData item in NewTable)
+                {
+                    foreach (Timetable table in NewTableList)
+                    {
+                        if (table.StationShortCode == item.stationShortCode)
+                        {
+                            table.ScheduledDepartureTime = item.scheduledTime;
+                        }
+                    }
+
+                    if (!item.cancelled && item.type == "ARRIVAL" && item.trainStopping)
+                    {
+                        Timetable table = new Timetable()
+                        {
+                            Cancelled = item.cancelled,
+                            CommercialTrack = item.commercialTrack,
+                            ScheduledArrivalTime = item.scheduledTime,
+                            StationShortCode = item.stationShortCode,
+                            Type = item.type,
+                            TrainReady = item.trainReady
+                        };
+
+                        List<string> stationName = (from t in con.Trainstation
+                                             where t.StationShortCode == item.stationShortCode
+                                             select t.StationName).ToList();
+                        table.StationName = stationName[0];
+
+                        NewTableList.Add(table);
+                    }
                 }
+                newTrain.TimetableRows = NewTableList.ToArray();
+                parsedData.Add(newTrain);
 
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
 
-            data = sb.ToString();
-            //TrainData[] parsedData = JsonConvert.DeserializeObject<TrainData[]>(data);
-
-            return data;
-            //yield return parsedData;
-
-
-            
+            return parsedData;
         }
 
         public class TrainReady
@@ -105,11 +122,33 @@ namespace AspNetDemo.Controllers
             public string trainType { get; set; }
             public string trainCategory { get; set; }
             public string timetableType { get; set; }
+            public DateTime timetableAcceptanceDate { get; set; }
             public bool runningCurrently { get; set; }
             public bool cancelled { get; set; }
             public TrainTravelData[] timetableRows { get; set; }
             public string commuterLineID { get; set; }
-            public int version { get; set; }
+            public long version { get; set; }
+        }
+
+        public class Timetable
+        {
+            public bool Cancelled { get; set; }
+            public string CommercialTrack { get; set; }
+            public string ScheduledArrivalTime { get; set; }
+            public string ScheduledDepartureTime { get; set; }
+            public string StationShortCode { get; set; }
+            public string StationName { get; set; }
+            public TrainReady TrainReady { get; set; }
+            public string Type { get; set; }
+        }
+
+        public class Train
+        {
+            public int TrainNumber { get; set; }
+            public string TrainType { get; set; }
+            public string TrainCategory { get; set; }
+            public bool Cancelled { get; set; }
+            public Timetable[] TimetableRows { get; set; }
         }
 
         
