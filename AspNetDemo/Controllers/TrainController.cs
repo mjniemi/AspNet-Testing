@@ -15,17 +15,16 @@ namespace AspNetDemo.Controllers
     [Route("api/[controller]")]
     public class TrainController : Controller
     {
+        /*
+         * GET action which handles api call and sending back the data to the front-end
+         */
         // GET: /<controller>/
         [HttpGet("[action]")]
         public List<Train> GetTrainData(string station)
         {
-            if (station == null || station == "")
-            {
-                station = "AIN";
-            }
+
             string apiUrl = "https://rata.digitraffic.fi/api/v1/live-trains/station/"
                 + station + "?arriving_trains=0&arrived_trains=0&departed_trains=0&departing_trains=3&include_nonstopping=false";
-            // Returns JSON string
 
             string data = GetTrains(apiUrl);
 
@@ -37,6 +36,9 @@ namespace AspNetDemo.Controllers
 
         }
 
+        /*
+         * Parses the list of train Data into a format used on the front-end
+         */
         private List<Train> ParseTrainData (List<TrainData> trains)
         {
             List<Train> parsedData = new List<Train>();
@@ -54,13 +56,43 @@ namespace AspNetDemo.Controllers
 
                 TrainTravelData[] NewTable = train.timetableRows;
                 List<Timetable> NewTableList = new List<Timetable>();
+                int index = 0;
                 foreach (TrainTravelData item in NewTable)
                 {
+                    
                     foreach (Timetable table in NewTableList)
                     {
                         if (table.StationShortCode == item.stationShortCode)
                         {
-                            table.ScheduledDepartureTime = item.scheduledTime;
+                            DateTime time = DateTime.Parse(item.scheduledTime);
+                            string hour = "";
+                            string min = "";
+                            string sec = "";
+                            if (time.Hour < 10)
+                            {
+                                hour = "0" + time.Hour;
+                            }
+                            else
+                            {
+                                hour = time.Hour.ToString();
+                            }
+                            if (time.Minute <10)
+                            {
+                                min = "0" + time.Minute;
+                            }
+                            else
+                            {
+                                min = time.Minute.ToString();
+                            }
+                            if (time.Second < 10)
+                            {
+                                sec = "0" + time.Second;
+                            }
+                            else
+                            {
+                                sec = time.Second.ToString();
+                            }
+                            table.ScheduledDepartureTime = hour + ":" + min + ":" + sec;
                         }
                     }
 
@@ -70,21 +102,59 @@ namespace AspNetDemo.Controllers
                         {
                             Cancelled = item.cancelled,
                             CommercialTrack = item.commercialTrack,
-                            ScheduledArrivalTime = item.scheduledTime,
                             StationShortCode = item.stationShortCode,
                             Type = item.type,
                             TrainReady = item.trainReady
                         };
 
+                        DateTime time = DateTime.Parse(item.scheduledTime);
+                        string hour = "";
+                        string min = "";
+                        string sec = "";
+                        if (time.Hour < 10)
+                        {
+                            hour = "0" + time.Hour;
+                        }
+                        else
+                        {
+                            hour = time.Hour.ToString();
+                        }
+                        if (time.Minute < 10)
+                        {
+                            min = "0" + time.Minute;
+                        }
+                        else
+                        {
+                            min = time.Minute.ToString();
+                        }
+                        if (time.Second < 10)
+                        {
+                            sec = "0" + time.Second;
+                        }
+                        else
+                        {
+                            sec = time.Second.ToString();
+                        }
+                        table.ScheduledArrivalTime = hour + ":" + min + ":" + sec;
                         List<string> stationName = (from t in con.Trainstation
                                              where t.StationShortCode == item.stationShortCode
                                              select t.StationName).ToList();
                         table.StationName = stationName[0];
-
+                        if (table.StationName.Contains(" asema"))
+                        {
+                            table.StationName = table.StationName.Replace(" asema", "");
+                        }
+                        
                         NewTableList.Add(table);
+                        index++;
                     }
                 }
                 newTrain.TimetableRows = NewTableList.ToArray();
+                if (newTrain.TimetableRows.Length > 0)
+                {
+                    newTrain.StartStation = newTrain.TimetableRows.First().StationName;
+                    newTrain.EndStation = newTrain.TimetableRows.Last().StationName;
+                }
                 parsedData.Add(newTrain);
 
             }
@@ -149,9 +219,13 @@ namespace AspNetDemo.Controllers
             public string TrainCategory { get; set; }
             public bool Cancelled { get; set; }
             public Timetable[] TimetableRows { get; set; }
+            public string StartStation { get; set; }
+            public string EndStation { get; set; }
         }
 
-        
+        /*
+         * Handles the API fetch call to VR API 
+         */
         string GetTrains(string url)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
