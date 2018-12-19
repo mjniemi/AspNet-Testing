@@ -21,7 +21,7 @@ namespace AspNetDemo.Controllers
         }
 
         [HttpGet("[action]")]
-        public List<Models.Trainstation> PopulateStations()
+        public List<Models.Trainstation> GetStations()
         {
 
             List<Models.Trainstation> stations = new List<Models.Trainstation>();
@@ -30,6 +30,10 @@ namespace AspNetDemo.Controllers
             {
                 if (st.PassengerTraffic)
                 {
+                    if (st.StationName.Contains(" asema"))
+                    {
+                        st.StationName = st.StationName.Replace(" asema", "");
+                    }
                     stations.Add(st);
                 }
             }

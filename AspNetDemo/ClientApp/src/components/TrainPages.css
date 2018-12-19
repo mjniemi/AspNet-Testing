@@ -1,0 +1,17 @@
+﻿.rt-td {
+    text-align: center;
+}
+
+.daySelect {
+    width: 100px;
+    margin-right: 10px;
+}
+
+.monthSelect {
+    width: 100px;
+}
+
+.yearSelect {
+    width: 100px;
+    margin-left: 10px;
+}

@@ -33,11 +33,16 @@ export class NavMenu extends Component {
                 <Glyphicon glyph='th-list' /> Fetch data
               </NavItem>
             </LinkContainer>
-            <LinkContainer to={'/trains'}>
+            <LinkContainer to={'/stationsearch'}>
                 <NavItem>
-                    <Glyphicon glyph='th-list' /> Trains
-                    </NavItem>
-             </LinkContainer>
+                    <Glyphicon glyph='th-list' /> Asemahaku
+                </NavItem>
+            </LinkContainer>
+            <LinkContainer to={'/routesearch'}>
+                <NavItem>
+                    <Glyphicon glyph='th-list' /> Reittihaku
+                </NavItem>
+            </LinkContainer>
           </Nav>
         </Navbar.Collapse>
       </Navbar>

@@ -36,10 +36,113 @@ namespace AspNetDemo.Controllers
 
         }
 
+        [HttpGet("[action]")]
+        public List<Train> GetRouteData(string parameters)
+        {
+            string[] paramArray = parameters.Split("_");
+            string stations = paramArray[0];
+            string date = paramArray[1];
+
+            string apiUrl = "https://rata.digitraffic.fi/api/v1/live-trains/station/" +stations
+                             + "?departure_date=" + date;
+            string data = GetTrains(apiUrl);
+
+            if (!data.Contains("errorMessage"))
+            {
+                List<TrainData> TypedData = JsonConvert.DeserializeObject<List<TrainData>>(data);
+                List<Train> parsedData = ParseTrainData(TypedData);
+                return parsedData;
+            }
+            else
+            {
+                List<Train> parsedData = new List<Train>();
+                return parsedData;
+            }
+
+        }
+
+        [HttpGet("[action]")]
+        public Dates GetDates()
+        {
+            Dates d = new Dates();
+
+            List<Year> years = CreateYearsList();
+            List<Month> months = CreateMonthsList();
+            d.months = months;
+            d.years = years;
+
+            return d;
+        }
+
+        public List<Month> CreateMonthsList()
+        {
+            List<Month> months = new List<Month>();
+            DateTime n = DateTime.Now;
+            List<string> names = new List<string>
+            {
+                "Tammikuu",
+                "Helmikuu",
+                "Maaliskuu",
+                "Huhtikuu",
+                "Toukokuu",
+                "Kesäkuu",
+                "Heinäkuu",
+                "Elokuu",
+                "Syyskuu",
+                "Lokakuu",
+                "Marraskuu",
+                "Joulukuu"
+            };
+            
+            int feb = 28;
+            if (DateTime.IsLeapYear(n.Year))
+            {
+                feb = 29;
+            }
+            for (int i = 0; i < names.Count; i++)
+            {
+                Month m = new Month();
+                if (i == 1)
+                {
+                    m.DaysIn = feb;
+                } else if (i == 3 || i == 5 || i == 8 || i == 10 )
+                {
+                    m.DaysIn = 30;
+                }
+                else
+                {
+                    m.DaysIn = 31;
+                }
+                m.Name = names[i];
+                m.Numeric = i+1;
+                months.Add(m);
+            }
+
+            return months;
+        }
+
+        public List<Year> CreateYearsList()
+        {
+            DateTime n = DateTime.Now;
+            int currentYear = n.Year;
+            List<Year> years = new List<Year>();
+            Year currentY = new Year
+            {
+                Numeric = currentYear
+            };
+            Year nextY = new Year
+            {
+                Numeric = currentYear + 1
+            };
+            years.Add(currentY);
+            years.Add(nextY);
+            return years;
+        }
+
         /*
          * Parses the list of train Data into a format used on the front-end
          */
-        private List<Train> ParseTrainData (List<TrainData> trains)
+        private List<Train> ParseTrainData(List<TrainData> trains)
         {
             List<Train> parsedData = new List<Train>();
             Models.AspNetDemoDBContext con = new Models.AspNetDemoDBContext();
@@ -59,7 +162,7 @@ namespace AspNetDemo.Controllers
                 int index = 0;
                 foreach (TrainTravelData item in NewTable)
                 {
-                    
+
                     foreach (Timetable table in NewTableList)
                     {
                         if (table.StationShortCode == item.stationShortCode)
@@ -76,7 +179,7 @@ namespace AspNetDemo.Controllers
                             {
                                 hour = time.Hour.ToString();
                             }
-                            if (time.Minute <10)
+                            if (time.Minute < 10)
                             {
                                 min = "0" + time.Minute;
                             }
@@ -94,6 +197,58 @@ namespace AspNetDemo.Controllers
                             }
                             table.ScheduledDepartureTime = hour + ":" + min + ":" + sec;
                         }
+                    }
+                    if (index == 0)
+                    {
+                        Timetable table = new Timetable()
+                        {
+                            Cancelled = item.cancelled,
+                            CommercialTrack = item.commercialTrack,
+                            StationShortCode = item.stationShortCode,
+                            Type = item.type,
+                            TrainReady = item.trainReady
+                        };
+
+                        DateTime time = DateTime.Parse(item.scheduledTime);
+                        string hour = "";
+                        string min = "";
+                        string sec = "";
+                        if (time.Hour < 10)
+                        {
+                            hour = "0" + time.Hour;
+                        }
+                        else
+                        {
+                            hour = time.Hour.ToString();
+                        }
+                        if (time.Minute < 10)
+                        {
+                            min = "0" + time.Minute;
+                        }
+                        else
+                        {
+                            min = time.Minute.ToString();
+                        }
+                        if (time.Second < 10)
+                        {
+                            sec = "0" + time.Second;
+                        }
+                        else
+                        {
+                            sec = time.Second.ToString();
+                        }
+                        table.ScheduledDepartureTime = hour + ":" + min + ":" + sec;
+
+                        List<string> stationName = (from t in con.Trainstation
+                                                    where t.StationShortCode == item.stationShortCode
+                                                    select t.StationName).ToList();
+                        table.StationName = stationName[0];
+                        if (table.StationName.Contains(" asema"))
+                        {
+                            table.StationName = table.StationName.Replace(" asema", "");
+                        }
+
+                        NewTableList.Add(table);
                     }
 
                     if (!item.cancelled && item.type == "ARRIVAL" && item.trainStopping)
@@ -137,17 +292,17 @@ namespace AspNetDemo.Controllers
                         }
                         table.ScheduledArrivalTime = hour + ":" + min + ":" + sec;
                         List<string> stationName = (from t in con.Trainstation
-                                             where t.StationShortCode == item.stationShortCode
-                                             select t.StationName).ToList();
+                                                    where t.StationShortCode == item.stationShortCode
+                                                    select t.StationName).ToList();
                         table.StationName = stationName[0];
                         if (table.StationName.Contains(" asema"))
                         {
                             table.StationName = table.StationName.Replace(" asema", "");
                         }
-                        
+
                         NewTableList.Add(table);
-                        index++;
                     }
+                    index++;
                 }
                 newTrain.TimetableRows = NewTableList.ToArray();
                 if (newTrain.TimetableRows.Length > 0)
@@ -183,7 +338,7 @@ namespace AspNetDemo.Controllers
             public TrainReady trainReady { get; set; }
             public bool trainStopping { get; set; }
             public string type { get; set; }
-            
+
         }
 
         public class TrainData
@@ -221,6 +376,24 @@ namespace AspNetDemo.Controllers
             public Timetable[] TimetableRows { get; set; }
             public string StartStation { get; set; }
             public string EndStation { get; set; }
+        }
+
+        public class Month
+        {
+            public int Numeric { get; set; }
+            public string Name { get; set; }
+            public int DaysIn { get; set; }
+        }
+
+        public class Year
+        {
+            public int Numeric { get; set; }
+        }
+
+        public class Dates
+        {
+            public List<Month> months { get; set; }
+            public List<Year> years { get; set; }
         }
 
         /*

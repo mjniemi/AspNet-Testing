@@ -1,4 +1,5 @@
-﻿import React, { Component } from 'react';
+﻿import './TrainPages.css';
+import React, { Component } from 'react';
 import ReactTable from "react-table";
 import Modal from "react-modal";
 import "react-table/react-table.css";
@@ -16,8 +17,8 @@ const modalStyles = {
 
 Modal.setAppElement('#root');
 
-export class Trains extends Component {
-    displayName = Trains.name
+export class StationSearch extends Component {
+    displayName = "Asemahaku"
 
     constructor(props) {
         super(props);
@@ -34,7 +35,7 @@ export class Trains extends Component {
         this.closeModal = this.closeModal.bind(this);
         
 
-        fetch('api/Station/PopulateStations')
+        fetch('api/Station/GetStations')
             .then(response => response.json())
             .then(data => {
                 
@@ -75,28 +76,7 @@ export class Trains extends Component {
         this.setState({ selectedStation: e.target.value });
     }
 
-    renderPageControls() {
-        return (
-            <div className='trainControlsDiv'>
-                 
-            <table className='trainControls'>
-                <thead>
-                    <tr>
-                        <th>Valitse asema</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                          
-                    </tr>
-                </tbody>
-                </table>
-            </div>
-            );
-    }
-
     renderTrainTable(trains) {
-        console.log(trains);
         if (trains.length < 1) {
             return (
                 <div>
@@ -151,21 +131,19 @@ export class Trains extends Component {
     }
 
     onClickRow(row) {
-        console.log(row);
         this.setState({ modalData: row });
         this.openModal();
     }
 
     render() {
         let contents = this.state.contents;
-        let controls = this.renderPageControls();
         
         return (
             <div id='content'>
-                <h1>Juna aikatauluja</h1>
+                <h1>Asemahaku</h1>
                 <p>Hakee tietoja asemalta seuraavaksi lähtevistä junista</p>
                 <div className='controlsDiv'>
-                    {controls}
+                    
                     <select name='stations-list' onChange={this.stationChange.bind(this)} >
                         {this.state.stations.map(station =>
                             
@@ -173,8 +151,9 @@ export class Trains extends Component {
                             
                         )};
                     </select>
-
-                    <button onClick={this.trainDataFetch.bind(this)} disabled={this.state.isButtonDisabled}>AAAAAAAAAAAAAAAAAA</button>
+                    <br></br>
+                    <br></br>
+                    <button onClick={this.trainDataFetch.bind(this)} disabled={this.state.isButtonDisabled}>Hae</button>
                 </div>
                 <br></br>
                 {contents}
@@ -200,6 +179,10 @@ export class Trains extends Component {
                                     {
                                         Header: "Lähtöaika",
                                         accessor: "scheduledDepartureTime"
+                                    },
+                                    {
+                                        Header: "Rata",
+                                        accessor: "commercialTrack"
                                     }
                                 ]}
                                 showPagination={false}
