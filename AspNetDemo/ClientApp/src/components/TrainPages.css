@@ -15,3 +15,14 @@
     width: 100px;
     margin-left: 10px;
 }
+
+.roundedButton {
+    border-radius: 2px;
+    margin-right: 10px;
+    width: 70px;
+}
+
+.scheduleTable {
+    height: 410px;
+    overflow-y: auto;
+}

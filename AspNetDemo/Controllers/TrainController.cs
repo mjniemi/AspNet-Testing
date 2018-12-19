@@ -15,9 +15,7 @@ namespace AspNetDemo.Controllers
     [Route("api/[controller]")]
     public class TrainController : Controller
     {
-        /*
-         * GET action which handles api call and sending back the data to the front-end
-         */
+        
         // GET: /<controller>/
         [HttpGet("[action]")]
         public List<Train> GetTrainData(string station)
@@ -59,84 +57,6 @@ namespace AspNetDemo.Controllers
                 return parsedData;
             }
 
-        }
-
-        [HttpGet("[action]")]
-        public Dates GetDates()
-        {
-            Dates d = new Dates();
-
-            List<Year> years = CreateYearsList();
-            List<Month> months = CreateMonthsList();
-            d.months = months;
-            d.years = years;
-
-            return d;
-        }
-
-        public List<Month> CreateMonthsList()
-        {
-            List<Month> months = new List<Month>();
-            DateTime n = DateTime.Now;
-            List<string> names = new List<string>
-            {
-                "Tammikuu",
-                "Helmikuu",
-                "Maaliskuu",
-                "Huhtikuu",
-                "Toukokuu",
-                "Kesäkuu",
-                "Heinäkuu",
-                "Elokuu",
-                "Syyskuu",
-                "Lokakuu",
-                "Marraskuu",
-                "Joulukuu"
-            };
-            
-            int feb = 28;
-            if (DateTime.IsLeapYear(n.Year))
-            {
-                feb = 29;
-            }
-            for (int i = 0; i < names.Count; i++)
-            {
-                Month m = new Month();
-                if (i == 1)
-                {
-                    m.DaysIn = feb;
-                } else if (i == 3 || i == 5 || i == 8 || i == 10 )
-                {
-                    m.DaysIn = 30;
-                }
-                else
-                {
-                    m.DaysIn = 31;
-                }
-                m.Name = names[i];
-                m.Numeric = i+1;
-                months.Add(m);
-            }
-
-            return months;
-        }
-
-        public List<Year> CreateYearsList()
-        {
-            DateTime n = DateTime.Now;
-            int currentYear = n.Year;
-            List<Year> years = new List<Year>();
-            Year currentY = new Year
-            {
-                Numeric = currentYear
-            };
-            Year nextY = new Year
-            {
-                Numeric = currentYear + 1
-            };
-            years.Add(currentY);
-            years.Add(nextY);
-            return years;
         }
 
         /*
@@ -378,24 +298,6 @@ namespace AspNetDemo.Controllers
             public string EndStation { get; set; }
         }
 
-        public class Month
-        {
-            public int Numeric { get; set; }
-            public string Name { get; set; }
-            public int DaysIn { get; set; }
-        }
-
-        public class Year
-        {
-            public int Numeric { get; set; }
-        }
-
-        public class Dates
-        {
-            public List<Month> months { get; set; }
-            public List<Year> years { get; set; }
-        }
-
         /*
          * Handles the API fetch call to VR API 
          */
@@ -414,13 +316,20 @@ namespace AspNetDemo.Controllers
             catch (WebException ex)
             {
                 WebResponse errorResponse = ex.Response;
-                using (Stream responseStream = errorResponse.GetResponseStream())
+                try
                 {
-                    StreamReader reader = new StreamReader(responseStream, System.Text.Encoding.GetEncoding("utf-8"));
-                    String errorText = reader.ReadToEnd();
-                    // log errorText
+                    using (Stream responseStream = errorResponse.GetResponseStream())
+                    {
+                        StreamReader reader = new StreamReader(responseStream, System.Text.Encoding.GetEncoding("utf-8"));
+                        String errorText = reader.ReadToEnd();
+                        string err = "errorMessage:" + errorText;
+                        return err;
+                    }
                 }
-                throw;
+                catch
+                {
+                    return ex.Response.ToString();
+                }
             }
         }
     }

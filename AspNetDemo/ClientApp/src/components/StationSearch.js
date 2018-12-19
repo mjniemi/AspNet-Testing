@@ -115,8 +115,8 @@ export class StationSearch extends Component {
                         id: "timetableRows",
                         accessor: "timetableRows",
                         Cell: ({ row }) => (
-                            <button onClick={e => this.onClickRow(row.timetableRows)}>
-                                Pysähdykset
+                            <button className="roundedButton" onClick={e => this.onClickRow(row.timetableRows)}>
+                                Aikataulu
                             </button>
                         )
                     }
@@ -124,7 +124,7 @@ export class StationSearch extends Component {
                 showPagination={false}
                 defaultPageSize={20}
                 minRows={1}
-                className="-striped -highlight" />
+                className="scrollabletable -striped -highlight" />
                 
             </div>     
         );
@@ -153,7 +153,7 @@ export class StationSearch extends Component {
                     </select>
                     <br></br>
                     <br></br>
-                    <button onClick={this.trainDataFetch.bind(this)} disabled={this.state.isButtonDisabled}>Hae</button>
+                    <button className="roundedButton" onClick={this.trainDataFetch.bind(this)} disabled={this.state.isButtonDisabled}>Hae</button>
                 </div>
                 <br></br>
                 {contents}
@@ -164,7 +164,7 @@ export class StationSearch extends Component {
                         shouldCloseOnOverlayClick={true}
                         style={modalStyles}>
                         <div>
-                            <button onClick={this.closeModal}>Sulje</button>
+                            <button className="roundedButton" onClick={this.closeModal}>Sulje</button>
                             <ReactTable
                                 data={this.state.modalData}
                                 columns={[
@@ -187,10 +187,10 @@ export class StationSearch extends Component {
                                 ]}
                                 showPagination={false}
                                 pageSizeOptions= {[4, 8, 12, 16, 20]}
-                                defaultPageSize={20}
+                                defaultPageSize={50}
                                 sortable={false}
                                 minRows={1}
-                                className="-striped -highlight" />
+                                className="scheduleTable -striped -highlight" />
                         </div>
                     </Modal >
                 </div>

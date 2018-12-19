@@ -1,6 +1,7 @@
 ﻿import './TrainPages.css';
 import React, { Component } from 'react';
 import ReactTable from "react-table";
+import DatePicker from 'react-date-picker';
 import Modal from "react-modal";
 import "react-table/react-table.css";
 
@@ -26,34 +27,18 @@ export class RouteSearch extends Component {
             stations: [],
             firstSelectedStation: "",
             secondSelectedStation: "",
-            days: [],
-            months: [],
-            years: [],
-            selectedDay: null,
-            selectedMonth: null,
-            selectedYear: null,
+            date: new Date(),
             isButtonDisabled: false,
             contents: "",
             modalOpen: false,
             modalData: null
         };
 
-
-        this.setDays = this.setDays.bind(this);
-        this.setSelectedDay = this.setSelectedDay.bind(this);
-        this.setSelectedMonth = this.setSelectedMonth.bind(this);
-        this.setSelectedYear = this.setSelectedYear.bind(this);
+        this.switchStations = this.switchStations.bind(this);
+        this.setDate = this.setDate.bind(this);
 
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
-
-
-        fetch('api/Train/GetDates')
-            .then(response => response.json())
-            .then(data => {
-                this.setState({ months: data.months, years: data.years, selectedMonth: (new Date().getMonth() + 1), selectedYear: new Date().getFullYear() });
-                this.setDays();
-            });
 
         fetch('api/Station/GetStations')
             .then(response => response.json())
@@ -71,29 +56,14 @@ export class RouteSearch extends Component {
         this.setState({ modalOpen: false });
     }
 
-    setSelectedDay(e) {
-        this.setState({ selectedDay: e.target.value });
+    switchStations() {
+        let f = this.state.firstSelectedStation;
+        let s = this.state.secondSelectedStation;
+        this.setState({ firstSelectedStation: s, secondSelectedStation: f });
     }
 
-    setSelectedMonth(e) {
-        this.setState({ selectedMonth: e.target.value });
-        this.setDays();
-    }
-
-    setSelectedYear(e) {
-        this.setState({ selectedYear: e.target.value });
-    }
-
-   
-
-    setDays() {
-        let m = this.state.selectedMonth;
-        let days = this.state.months[(m-1)];
-        let daysArray = [];
-        for (let i = 0; i < days.daysIn; i++) {
-            daysArray.push(i + 1);
-        }
-        this.setState({ days: daysArray, selectedDay: new Date().getDate() });
+    setDate(date) {
+        this.setState({ date: date });
     }
 
     trainDataFetch() {
@@ -101,9 +71,9 @@ export class RouteSearch extends Component {
 
         let stations = this.state.firstSelectedStation;
         stations = stations + "/" + this.state.secondSelectedStation;
-        let date = this.state.selectedYear;
-        date = date + "-" + this.state.selectedMonth;
-        date = date + "-" + this.state.selectedDay;
+        let date = this.state.date.getFullYear();
+        date = date + "-" + (this.state.date.getMonth() + 1);
+        date = date + "-" + this.state.date.getDate();
         this.setState({
             isButtonDisabled: true,
             contents: contents
@@ -165,8 +135,8 @@ export class RouteSearch extends Component {
                             id: "timetableRows",
                             accessor: "timetableRows",
                             Cell: ({ row }) => (
-                                <button onClick={e => this.onClickRow(row.timetableRows)}>
-                                    Pysähdykset
+                                <button className="roundedButton" onClick={e => this.onClickRow(row.timetableRows)}>
+                                    Aikataulu
                             </button>
                             )
                         }
@@ -187,8 +157,8 @@ export class RouteSearch extends Component {
 
     render() {
         let contents = this.state.contents;
-        let day = (this.state.selectedDay) ? this.state.selectedDay : new Date().getDate();
-        let month = (this.state.selectedMonth) ? this.state.selectedMonth : new Date().getMonth();
+        let firstStation = this.state.firstSelectedStation;
+        let secondStation = this.state.secondSelectedStation;
         
         return (
             <div id='content'>
@@ -196,29 +166,15 @@ export class RouteSearch extends Component {
                 <p>Hakee tiedot asemien välillä kulkevista junista annettuna päivänä.</p>
                 <div className='controlsDiv'>
                     <div className='dateDiv'>
-
-                            <select name='day-list' className="daySelect" value={day} onChange={this.setSelectedDay}>
-                                {this.state.days.map((day) =>
-                                    <option key={day} value={day}>{day}</option>
-                                )};
-                            </select>
-
-                            <select name='month-list' className="monthSelect" value={month} onChange={this.setSelectedMonth}>
-                                {this.state.months.map(month =>
-                                    <option key={month.numeric} value={month.numeric}>{month.name}</option>
-                                )};
-                            </select>
-
-                            <select name='year-list' className="yearSelect" onChange={this.setSelectedYear}>
-                                {this.state.years.map(year =>
-                                    <option key={year.numeric} value={year.numeric}>{year.numeric}</option>
-                                )};
-                            </select>
-
+                        <DatePicker
+                                locale="fi-FI"
+                                onChange={this.setDate}
+                                value={this.state.date}
+                            />
                     </div>
                     <br></br>
                     <p>Lähtöasema:&nbsp;&nbsp;
-                    <select name='first-stations-list' onChange={this.firstStationChange.bind(this)} >
+                    <select name='first-stations-list' value={firstStation} onChange={this.firstStationChange.bind(this)} >
                         {this.state.stations.map(station =>
 
                             <option key={station.stationShortCode} value={station.stationShortCode}>{station.stationName}</option>
@@ -228,7 +184,7 @@ export class RouteSearch extends Component {
                     </p>
                     <br></br>
                     <p>Pääteasema:&nbsp;&nbsp;
-                    <select name='second-stations-list' onChange={this.secondStationChange.bind(this)} >
+                    <select name='second-stations-list' value={secondStation} onChange={this.secondStationChange.bind(this)} >
                         {this.state.stations.map(station =>
 
                             <option key={station.stationShortCode} value={station.stationShortCode}>{station.stationName}</option>
@@ -236,7 +192,8 @@ export class RouteSearch extends Component {
                         )};
                     </select>
                     </p>
-                    <button onClick={this.trainDataFetch.bind(this)} disabled={this.state.isButtonDisabled}>Hae</button>
+                    <button className="roundedButton" onClick={this.trainDataFetch.bind(this)} disabled={this.state.isButtonDisabled}>Hae</button>
+                    <button className="roundedButton" onClick={this.switchStations}>Vaihda</button>
                 </div>
                 <br></br>
                 {contents}
@@ -247,7 +204,7 @@ export class RouteSearch extends Component {
                         shouldCloseOnOverlayClick={true}
                         style={modalStyles}>
                         <div>
-                            <button onClick={this.closeModal}>Sulje</button>
+                            <button className="roundedButton" onClick={this.closeModal}>Sulje</button>
                             <ReactTable
                                 data={this.state.modalData}
                                 columns={[
@@ -273,7 +230,7 @@ export class RouteSearch extends Component {
                                 defaultPageSize={20}
                                 sortable={false}
                                 minRows={1}
-                                className="-striped -highlight" />
+                                className="scheduleTable -striped -highlight" />
                         </div>
                     </Modal >
                 </div>
