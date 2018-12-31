@@ -162,8 +162,10 @@ export class RouteSearch extends Component {
         
         return (
             <div id='content'>
-                <h1>Reittihaku</h1>
-                <p>Hakee tiedot asemien välillä kulkevista junista annettuna päivänä.</p>
+                <div className="headerDiv">
+                    <h1>Reittihaku</h1>
+                    <p>Hakee tiedot asemien välillä kulkevista junista annettuna päivänä.</p>
+                </div>
                 <div className='controlsDiv'>
                     <div className='dateDiv'>
                         <DatePicker

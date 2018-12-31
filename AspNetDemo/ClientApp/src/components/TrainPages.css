@@ -16,10 +16,22 @@
     margin-left: 10px;
 }
 
+.react-date-picker__clear-button {
+    visibility: hidden;
+}
+
 .roundedButton {
     border-radius: 2px;
     margin-right: 10px;
     width: 70px;
+}
+
+.controlsDiv {
+    margin-left: 20px;
+}
+
+.headerDiv {
+    margin-left: 20px;
 }
 
 .scheduleTable {

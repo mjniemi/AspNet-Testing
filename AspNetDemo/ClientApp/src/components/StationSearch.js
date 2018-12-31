@@ -140,9 +140,11 @@ export class StationSearch extends Component {
         
         return (
             <div id='content'>
-                <h1>Asemahaku</h1>
-                <p>Hakee tietoja asemalta seuraavaksi lähtevistä junista</p>
-                <div className='controlsDiv'>
+                <div className="headerDiv">
+                    <h1>Asemahaku</h1>
+                    <p>Hakee tietoja asemalta seuraavaksi lähtevistä junista</p>
+                </div>
+                <div className="controlsDiv">
                     
                     <select name='stations-list' onChange={this.stationChange.bind(this)} >
                         {this.state.stations.map(station =>
