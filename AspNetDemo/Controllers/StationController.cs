@@ -11,15 +11,19 @@ using System.Data.SqlClient;
 
 namespace AspNetDemo.Controllers
 {
+    /// <summary>
+    /// Station Controller
+    /// </summary>
     [Route("api/[controller]")]
     public class StationController : Controller
     {
-
-        public IActionResult Index()
-        {
-            return View();
-        }
-
+        /// <summary>
+        /// Get Stations
+        /// </summary>
+        /// <remarks>
+        /// Gets list of stations from the database
+        /// </remarks>
+        /// <returns>List of trainstations</returns>
         [HttpGet("[action]")]
         public List<Models.Trainstation> GetStations()
         {

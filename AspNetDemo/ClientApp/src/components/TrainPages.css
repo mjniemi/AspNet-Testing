@@ -20,6 +20,13 @@
     visibility: hidden;
 }
 
+.roundedSwitchButton {
+    border-radius: 2px;
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 50px;
+}
+
 .roundedButton {
     border-radius: 2px;
     margin-right: 10px;

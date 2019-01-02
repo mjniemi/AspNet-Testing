@@ -72,8 +72,16 @@ export class RouteSearch extends Component {
         let stations = this.state.firstSelectedStation;
         stations = stations + "/" + this.state.secondSelectedStation;
         let date = this.state.date.getFullYear();
-        date = date + "-" + (this.state.date.getMonth() + 1);
-        date = date + "-" + this.state.date.getDate();
+        let month = this.state.date.getMonth() + 1;
+        if (month < 10) {
+            month = "0" + month;
+        }
+        let day = this.state.date.getDate();
+        if (day < 10) {
+            day = "0" + day;
+        }
+        date = date + "-" + month;
+        date = date + "-" + day;
         this.setState({
             isButtonDisabled: true,
             contents: contents
@@ -175,27 +183,51 @@ export class RouteSearch extends Component {
                             />
                     </div>
                     <br></br>
-                    <p>Lähtöasema:&nbsp;&nbsp;
-                    <select name='first-stations-list' value={firstStation} onChange={this.firstStationChange.bind(this)} >
-                        {this.state.stations.map(station =>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    Lähtöasema:
+                                </th>
+                                <th></th>
+                                <th>
+                                    Pääteasema:
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <div className="firstStationDiv">
+                                    <select name='first-stations-list' value={firstStation} onChange={this.firstStationChange.bind(this)} >
+                                        {this.state.stations.map(station =>
 
-                            <option key={station.stationShortCode} value={station.stationShortCode}>{station.stationName}</option>
+                                            <option key={station.stationShortCode} value={station.stationShortCode}>{station.stationName}</option>
 
-                        )};
-                    </select>
-                    </p>
+                                        )};
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <button className="roundedSwitchButton" onClick={this.switchStations}>&lt; &gt;</button>
+                            </td>
+                            <td>
+                                <div className="secondStationDiv">
+                                    <select name='second-stations-list' value={secondStation} onChange={this.secondStationChange.bind(this)} >
+                                        {this.state.stations.map(station =>
+
+                                            <option key={station.stationShortCode} value={station.stationShortCode}>{station.stationName}</option>
+
+                                        )};
+                                    </select>
+                                </div>
+                            </td>
+                            </tr>
+                        </tbody>
+                    </table>
                     <br></br>
-                    <p>Pääteasema:&nbsp;&nbsp;
-                    <select name='second-stations-list' value={secondStation} onChange={this.secondStationChange.bind(this)} >
-                        {this.state.stations.map(station =>
-
-                            <option key={station.stationShortCode} value={station.stationShortCode}>{station.stationName}</option>
-
-                        )};
-                    </select>
-                    </p>
                     <button className="roundedButton" onClick={this.trainDataFetch.bind(this)} disabled={this.state.isButtonDisabled}>Hae</button>
-                    <button className="roundedButton" onClick={this.switchStations}>Vaihda</button>
+ 
                 </div>
                 <br></br>
                 {contents}

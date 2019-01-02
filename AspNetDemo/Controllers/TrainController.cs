@@ -7,16 +7,27 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using AspNetDemo.Models;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace AspNetDemo.Controllers
 {
+    /// <summary>
+    /// Train Controller
+    /// </summary>
     [Route("api/[controller]")]
     public class TrainController : Controller
     {
         
-        // GET: /<controller>/
+        /// <summary>
+        /// Get Train Data
+        /// </summary>
+        /// <remarks>
+        /// Gets a list of departing trains from a given station
+        /// </remarks>
+        /// <param name="station">Station short code</param>
+        /// <returns>List of trains</returns>
         [HttpGet("[action]")]
         public List<Train> GetTrainData(string station)
         {
@@ -34,6 +45,14 @@ namespace AspNetDemo.Controllers
 
         }
 
+        /// <summary>
+        /// Get Route Data
+        /// </summary>
+        /// <remarks>
+        /// Gets a list of trains between given stations on a given day
+        /// </remarks>
+        /// <param name="parameters">String including station short codes and date</param>
+        /// <returns>List of trains</returns>
         [HttpGet("[action]")]
         public List<Train> GetRouteData(string parameters)
         {
@@ -71,13 +90,13 @@ namespace AspNetDemo.Controllers
             {
                 Train newTrain = new Train
                 {
-                    TrainNumber = train.trainNumber,
-                    TrainType = train.trainType,
-                    TrainCategory = train.trainCategory,
-                    Cancelled = train.cancelled,
+                    TrainNumber = train.TrainNumber,
+                    TrainType = train.TrainType,
+                    TrainCategory = train.TrainCategory,
+                    Cancelled = train.Cancelled,
                 };
 
-                TrainTravelData[] NewTable = train.timetableRows;
+                TrainTravelData[] NewTable = train.TimetableRows;
                 List<Timetable> NewTableList = new List<Timetable>();
                 int index = 0;
                 foreach (TrainTravelData item in NewTable)
@@ -85,9 +104,9 @@ namespace AspNetDemo.Controllers
 
                     foreach (Timetable table in NewTableList)
                     {
-                        if (table.StationShortCode == item.stationShortCode)
+                        if (table.StationShortCode == item.StationShortCode)
                         {
-                            DateTime time = DateTime.Parse(item.scheduledTime);
+                            DateTime time = DateTime.Parse(item.ScheduledTime);
                             string hour = "";
                             string min = "";
                             string sec = "";
@@ -122,14 +141,13 @@ namespace AspNetDemo.Controllers
                     {
                         Timetable table = new Timetable()
                         {
-                            Cancelled = item.cancelled,
-                            CommercialTrack = item.commercialTrack,
-                            StationShortCode = item.stationShortCode,
-                            Type = item.type,
-                            TrainReady = item.trainReady
+                            Cancelled = item.Cancelled,
+                            CommercialTrack = item.CommercialTrack,
+                            StationShortCode = item.StationShortCode,
+                            TrainReady = item.TrainReady
                         };
 
-                        DateTime time = DateTime.Parse(item.scheduledTime);
+                        DateTime time = DateTime.Parse(item.ScheduledTime);
                         string hour = "";
                         string min = "";
                         string sec = "";
@@ -160,7 +178,7 @@ namespace AspNetDemo.Controllers
                         table.ScheduledDepartureTime = hour + ":" + min + ":" + sec;
 
                         List<string> stationName = (from t in con.Trainstation
-                                                    where t.StationShortCode == item.stationShortCode
+                                                    where t.StationShortCode == item.StationShortCode
                                                     select t.StationName).ToList();
                         table.StationName = stationName[0];
                         if (table.StationName.Contains(" asema"))
@@ -171,18 +189,17 @@ namespace AspNetDemo.Controllers
                         NewTableList.Add(table);
                     }
 
-                    if (!item.cancelled && item.type == "ARRIVAL" && item.trainStopping)
+                    if (!item.Cancelled && item.Type == "ARRIVAL" && item.TrainStopping)
                     {
                         Timetable table = new Timetable()
                         {
-                            Cancelled = item.cancelled,
-                            CommercialTrack = item.commercialTrack,
-                            StationShortCode = item.stationShortCode,
-                            Type = item.type,
-                            TrainReady = item.trainReady
+                            Cancelled = item.Cancelled,
+                            CommercialTrack = item.CommercialTrack,
+                            StationShortCode = item.StationShortCode,
+                            TrainReady = item.TrainReady
                         };
 
-                        DateTime time = DateTime.Parse(item.scheduledTime);
+                        DateTime time = DateTime.Parse(item.ScheduledTime);
                         string hour = "";
                         string min = "";
                         string sec = "";
@@ -212,7 +229,7 @@ namespace AspNetDemo.Controllers
                         }
                         table.ScheduledArrivalTime = hour + ":" + min + ":" + sec;
                         List<string> stationName = (from t in con.Trainstation
-                                                    where t.StationShortCode == item.stationShortCode
+                                                    where t.StationShortCode == item.StationShortCode
                                                     select t.StationName).ToList();
                         table.StationName = stationName[0];
                         if (table.StationName.Contains(" asema"))
@@ -233,75 +250,13 @@ namespace AspNetDemo.Controllers
                 parsedData.Add(newTrain);
 
             }
-
             return parsedData;
-        }
-
-        public class TrainReady
-        {
-            public bool accepted { get; set; }
-            public string source { get; set; }
-            public string timestamp { get; set; }
-        }
-
-        public class TrainTravelData
-        {
-            public string actualTime { get; set; }
-            public bool cancelled { get; set; }
-            public bool commercialStop { get; set; }
-            public string commercialTrack { get; set; }
-            public string countryCode { get; set; }
-            public int differenceInMinutes { get; set; }
-            public string scheduledTime { get; set; }
-            public string stationShortCode { get; set; }
-            public int stationUICCode { get; set; }
-            public TrainReady trainReady { get; set; }
-            public bool trainStopping { get; set; }
-            public string type { get; set; }
-
-        }
-
-        public class TrainData
-        {
-            public int trainNumber { get; set; }
-            public string trainType { get; set; }
-            public string trainCategory { get; set; }
-            public string timetableType { get; set; }
-            public DateTime timetableAcceptanceDate { get; set; }
-            public bool runningCurrently { get; set; }
-            public bool cancelled { get; set; }
-            public TrainTravelData[] timetableRows { get; set; }
-            public string commuterLineID { get; set; }
-            public long version { get; set; }
-        }
-
-        public class Timetable
-        {
-            public bool Cancelled { get; set; }
-            public string CommercialTrack { get; set; }
-            public string ScheduledArrivalTime { get; set; }
-            public string ScheduledDepartureTime { get; set; }
-            public string StationShortCode { get; set; }
-            public string StationName { get; set; }
-            public TrainReady TrainReady { get; set; }
-            public string Type { get; set; }
-        }
-
-        public class Train
-        {
-            public int TrainNumber { get; set; }
-            public string TrainType { get; set; }
-            public string TrainCategory { get; set; }
-            public bool Cancelled { get; set; }
-            public Timetable[] TimetableRows { get; set; }
-            public string StartStation { get; set; }
-            public string EndStation { get; set; }
-        }
+        } 
 
         /*
          * Handles the API fetch call to VR API 
          */
-        string GetTrains(string url)
+        private string GetTrains(string url)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             try
