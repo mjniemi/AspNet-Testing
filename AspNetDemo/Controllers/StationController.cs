@@ -8,15 +8,20 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Data.SqlClient;
+using AspNetDemo.Models;
 
 namespace AspNetDemo.Controllers
 {
+    
     /// <summary>
     /// Station Controller
     /// </summary>
     [Route("api/[controller]")]
     public class StationController : Controller
     {
+
+        List<Trainstation> stations = new List<Trainstation>();
+
         /// <summary>
         /// Get Stations
         /// </summary>
@@ -25,12 +30,11 @@ namespace AspNetDemo.Controllers
         /// </remarks>
         /// <returns>List of trainstations</returns>
         [HttpGet("[action]")]
-        public List<Models.Trainstation> GetStations()
+        public List<Trainstation> GetStations()
         {
 
-            List<Models.Trainstation> stations = new List<Models.Trainstation>();
-            Models.AspNetDemoDBContext con = new Models.AspNetDemoDBContext();
-            foreach (Models.Trainstation st in con.Trainstation)
+            AspNetDemoDBContext con = new AspNetDemoDBContext();
+            foreach (Trainstation st in con.Trainstation)
             {
                 if (st.PassengerTraffic)
                 {
@@ -41,10 +45,8 @@ namespace AspNetDemo.Controllers
                     stations.Add(st);
                 }
             }
-
             return stations;
         }
 
-       
     }
 }

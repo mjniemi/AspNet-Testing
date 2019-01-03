@@ -56,6 +56,9 @@ export class RouteSearch extends Component {
         this.setState({ modalOpen: false });
     }
 
+    /*
+     * Switches the station selections around
+     */
     switchStations() {
         let f = this.state.firstSelectedStation;
         let s = this.state.secondSelectedStation;
@@ -66,6 +69,9 @@ export class RouteSearch extends Component {
         this.setState({ date: date });
     }
 
+    /*
+     * Calls the api to get train data by station codes and date
+     */
     trainDataFetch() {
         let contents = <p>Ladataan...</p>;
 
@@ -104,6 +110,9 @@ export class RouteSearch extends Component {
         this.setState({ secondSelectedStation: e.target.value });
     }
 
+    /*
+     * Renders the table of fetched train data
+     */
     renderTrainTable(trains) {
         if (trains.length < 1) {
             return (
@@ -153,16 +162,21 @@ export class RouteSearch extends Component {
                     defaultPageSize={20}
                     minRows={1}
                     className="-striped -highlight" />
-
             </div>
         );
     }
 
+    /*
+     * Sets the clicked row's data as the data to show on the modal, and opens the modal panel
+     */
     onClickRow(row) {
         this.setState({ modalData: row });
         this.openModal();
     }
 
+    /*
+     * Renders the initial layout, including the modal panel which is not shown unless opened.
+     */
     render() {
         let contents = this.state.contents;
         let firstStation = this.state.firstSelectedStation;
@@ -201,9 +215,7 @@ export class RouteSearch extends Component {
                                 <div className="firstStationDiv">
                                     <select name='first-stations-list' value={firstStation} onChange={this.firstStationChange.bind(this)} >
                                         {this.state.stations.map(station =>
-
                                             <option key={station.stationShortCode} value={station.stationShortCode}>{station.stationName}</option>
-
                                         )};
                                     </select>
                                 </div>

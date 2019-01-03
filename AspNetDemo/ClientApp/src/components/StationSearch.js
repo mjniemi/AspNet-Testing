@@ -52,6 +52,9 @@ export class StationSearch extends Component {
         this.setState({ modalOpen: false });
     }
 
+    /*
+     * Calls the api to get train data by station code
+     */
     trainDataFetch() {
         let contents = <p>Ladataan...</p>;
 
@@ -72,10 +75,16 @@ export class StationSearch extends Component {
             });
     }
 
+    /*
+     * Changes the selected station to the react state
+     */
     stationChange(e) {
         this.setState({ selectedStation: e.target.value });
     }
 
+    /*
+     * Renders the table of fetched train data
+     */
     renderTrainTable(trains) {
         if (trains.length < 1) {
             return (
@@ -130,11 +139,17 @@ export class StationSearch extends Component {
         );
     }
 
+    /*
+     * Sets the clicked row's data as the data to show on the modal, and opens the modal panel
+     */
     onClickRow(row) {
         this.setState({ modalData: row });
         this.openModal();
     }
 
+    /*
+     * Renders the initial layout, including the modal panel which is not shown unless opened.
+     */
     render() {
         let contents = this.state.contents;
         
@@ -147,10 +162,8 @@ export class StationSearch extends Component {
                 <div className="controlsDiv">
                     
                     <select name='stations-list' onChange={this.stationChange.bind(this)} >
-                        {this.state.stations.map(station =>
-                            
-                            <option key={station.stationShortCode} value={station.stationShortCode}>{station.stationName}</option>
-                            
+                        {this.state.stations.map(station =>         
+                            <option key={station.stationShortCode} value={station.stationShortCode}>{station.stationName}</option>  
                         )};
                     </select>
                     <br></br>

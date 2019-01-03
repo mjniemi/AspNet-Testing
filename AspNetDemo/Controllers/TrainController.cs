@@ -9,8 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using AspNetDemo.Models;
 
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace AspNetDemo.Controllers
 {
     /// <summary>
@@ -38,11 +36,9 @@ namespace AspNetDemo.Controllers
             string data = GetTrains(apiUrl);
 
             List<TrainData> TypedData = JsonConvert.DeserializeObject<List<TrainData>>(data);
-
             List<Train> parsedData = ParseTrainData(TypedData);
 
             return parsedData;
-
         }
 
         /// <summary>
@@ -75,12 +71,13 @@ namespace AspNetDemo.Controllers
                 List<Train> parsedData = new List<Train>();
                 return parsedData;
             }
-
         }
 
-        /*
-         * Parses the list of train Data into a format used on the front-end
-         */
+        /// <summary>
+        /// Parses the API data to a more easily displayed format.
+        /// </summary>
+        /// <param name="trains">List of trains from API</param>
+        /// <returns>List of parsed train data</returns>
         private List<Train> ParseTrainData(List<TrainData> trains)
         {
             List<Train> parsedData = new List<Train>();
