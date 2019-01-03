@@ -20,6 +20,10 @@
     visibility: hidden;
 }
 
+.react-date-picker__wrapper {
+    background: white;
+}
+
 .roundedSwitchButton {
     border-radius: 2px;
     margin-left: 10px;
@@ -30,18 +34,25 @@
 .roundedButton {
     border-radius: 2px;
     margin-right: 10px;
-    width: 70px;
+    width: 80px;
 }
 
-.controlsDiv {
-    margin-left: 20px;
-}
-
-.headerDiv {
-    margin-left: 20px;
+.upperDiv {
+    padding-left: 20px;
+    padding-bottom: 10px;
+    background: linear-gradient(rgb(179, 217, 255, 1), rgb(179, 217, 255, 0));
 }
 
 .scheduleTable {
     height: 410px;
     overflow-y: auto;
+}
+
+.stationsChoiceDiv {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.fillerHeader {
+    height: 15px;
 }

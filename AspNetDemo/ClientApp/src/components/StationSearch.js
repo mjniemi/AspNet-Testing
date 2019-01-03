@@ -26,6 +26,7 @@ export class StationSearch extends Component {
             stations: [],
             selectedStation: "",
             isButtonDisabled: false,
+            buttonText: "Hae",
             contents: "",
             modalOpen: false,
             modalData: null
@@ -56,16 +57,17 @@ export class StationSearch extends Component {
      * Calls the api to get train data by station code
      */
     trainDataFetch() {
-        let contents = <p>Ladataan...</p>;
+        let contents = <h3>Ladataan...</h3>;
 
         let stationCode = this.state.selectedStation;
         this.setState({
             isButtonDisabled: true,
+            buttonText: "Ladataan",
             contents: contents
         });
 
         // Button disabled for a few seconds to prevent repeated calls to VR api
-        setTimeout(() => this.setState({ isButtonDisabled: false }), 5500);
+        setTimeout(() => this.setState({ isButtonDisabled: false, buttonText: "Hae" }), 5500);
 
 
         fetch('api/Train/GetTrainData?station='+stationCode)
@@ -89,7 +91,7 @@ export class StationSearch extends Component {
         if (trains.length < 1) {
             return (
                 <div>
-                    <p>Ei lähteviä junia.</p>
+                    <h3>Ei saatavilla lähteviä junia.</h3>
                 </div>
                 );
         }
@@ -155,20 +157,22 @@ export class StationSearch extends Component {
         
         return (
             <div id='content'>
-                <div className="headerDiv">
-                    <h1>Asemahaku</h1>
-                    <p>Hakee tietoja asemalta seuraavaksi lähtevistä junista</p>
-                </div>
-                <div className="controlsDiv">
+                <div className="upperDiv">
+                    <div className="headerDiv">
+                        <h1>Asemahaku</h1>
+                        <p>Hakee tietoja asemalta seuraavaksi lähtevistä junista</p>
+                    </div>
+                    <div className="controlsDiv">
                     
-                    <select name='stations-list' onChange={this.stationChange.bind(this)} >
-                        {this.state.stations.map(station =>         
-                            <option key={station.stationShortCode} value={station.stationShortCode}>{station.stationName}</option>  
-                        )};
-                    </select>
-                    <br></br>
-                    <br></br>
-                    <button className="roundedButton" onClick={this.trainDataFetch.bind(this)} disabled={this.state.isButtonDisabled}>Hae</button>
+                        <select name='stations-list' onChange={this.stationChange.bind(this)} >
+                            {this.state.stations.map(station =>         
+                                <option key={station.stationShortCode} value={station.stationShortCode}>{station.stationName}</option>  
+                            )};
+                        </select>
+                        <br></br>
+                        <br></br>
+                        <button className="roundedButton" onClick={this.trainDataFetch.bind(this)} disabled={this.state.isButtonDisabled}>{this.state.buttonText}</button>
+                    </div>
                 </div>
                 <br></br>
                 {contents}

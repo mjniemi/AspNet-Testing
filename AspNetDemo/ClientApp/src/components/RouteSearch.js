@@ -29,6 +29,7 @@ export class RouteSearch extends Component {
             secondSelectedStation: "",
             date: new Date(),
             isButtonDisabled: false,
+            buttonText: "Hae",
             contents: "",
             modalOpen: false,
             modalData: null
@@ -73,7 +74,7 @@ export class RouteSearch extends Component {
      * Calls the api to get train data by station codes and date
      */
     trainDataFetch() {
-        let contents = <p>Ladataan...</p>;
+        let contents = <h3>Ladataan...</h3>;
 
         let stations = this.state.firstSelectedStation;
         stations = stations + "/" + this.state.secondSelectedStation;
@@ -90,10 +91,11 @@ export class RouteSearch extends Component {
         date = date + "-" + day;
         this.setState({
             isButtonDisabled: true,
+            buttonText: "Ladataan",
             contents: contents
         });
         // Button disabled for a few seconds to prevent repeated calls to VR api
-        setTimeout(() => this.setState({ isButtonDisabled: false }), 5500);
+        setTimeout(() => this.setState({ isButtonDisabled: false, buttonText: "Hae" }), 5500);
 
         fetch('api/Train/GetRouteData?parameters=' + stations + "_" + date)
             .then(response => response.json())
@@ -117,7 +119,7 @@ export class RouteSearch extends Component {
         if (trains.length < 1) {
             return (
                 <div>
-                    <p>Ei junia reitillä valittuna päivänä.</p>
+                    <h3>Ei junia reitillä valittuna päivänä.</h3>
                 </div>
             );
         }
@@ -184,34 +186,25 @@ export class RouteSearch extends Component {
         
         return (
             <div id='content'>
-                <div className="headerDiv">
-                    <h1>Reittihaku</h1>
-                    <p>Hakee tiedot asemien välillä kulkevista junista annettuna päivänä.</p>
-                </div>
-                <div className='controlsDiv'>
-                    <div className='dateDiv'>
-                        <DatePicker
-                                locale="fi-FI"
-                                onChange={this.setDate}
-                                value={this.state.date}
-                            />
+                <div className="upperDiv">
+                    <div className="headerDiv">
+                        <h1>Reittihaku</h1>
+                        <p>Hakee tiedot asemien välillä kulkevista junista annettuna päivänä.</p>
                     </div>
-                    <br></br>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>
+                    <div className='controlsDiv'>
+                        <div className='dateDiv'>
+                            <DatePicker
+                                    locale="fi-FI"
+                                    onChange={this.setDate}
+                                    value={this.state.date}
+                                />
+                        </div>
+                        <br></br>
+                        <div className="stationsChoiceDiv">
+                            <div className="stationsFirstColumn">
+                                <div className="firstHeader">
                                     Lähtöasema:
-                                </th>
-                                <th></th>
-                                <th>
-                                    Pääteasema:
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>
+                                </div>
                                 <div className="firstStationDiv">
                                     <select name='first-stations-list' value={firstStation} onChange={this.firstStationChange.bind(this)} >
                                         {this.state.stations.map(station =>
@@ -219,27 +212,30 @@ export class RouteSearch extends Component {
                                         )};
                                     </select>
                                 </div>
-                            </td>
-                            <td>
-                                <button className="roundedSwitchButton" onClick={this.switchStations}>&lt; &gt;</button>
-                            </td>
-                            <td>
+                            </div>
+                            <div className="buttonColumn">
+                                <div className="fillerHeader"></div>
+                                <div className="switchButtonDiv">
+                                    <button className="roundedSwitchButton" onClick={this.switchStations}>&lt; &gt;</button>
+                                </div>
+                            </div>
+                            <div className="stationsSecondColumn">
+                                <div className="secondHeader">
+                                    Pääteasema:
+                                </div>
                                 <div className="secondStationDiv">
                                     <select name='second-stations-list' value={secondStation} onChange={this.secondStationChange.bind(this)} >
                                         {this.state.stations.map(station =>
-
                                             <option key={station.stationShortCode} value={station.stationShortCode}>{station.stationName}</option>
-
                                         )};
                                     </select>
                                 </div>
-                            </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <br></br>
-                    <button className="roundedButton" onClick={this.trainDataFetch.bind(this)} disabled={this.state.isButtonDisabled}>Hae</button>
+                            </div>
+                        </div>
+                        <br></br>
+                        <button className="roundedButton" onClick={this.trainDataFetch.bind(this)} disabled={this.state.isButtonDisabled}>{this.state.buttonText}</button>
  
+                    </div>
                 </div>
                 <br></br>
                 {contents}
@@ -251,6 +247,7 @@ export class RouteSearch extends Component {
                         style={modalStyles}>
                         <div>
                             <button className="roundedButton" onClick={this.closeModal}>Sulje</button>
+                            <br></br>
                             <ReactTable
                                 data={this.state.modalData}
                                 columns={[
