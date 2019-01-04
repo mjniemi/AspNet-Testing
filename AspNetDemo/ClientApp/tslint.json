@@ -1,0 +1,22 @@
+{
+  "cliOptions": {
+    "exclude": [
+      "js",
+      "public",
+      "node_modules"
+    ]
+  },
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended"
+  ],
+  "jsRules": {},
+  "rules": {
+    "new-parens": true,
+    "no-consecutive-blank-lines": false,
+    "jsx-no-lambda": false,
+    "object-literal-sort-keys": false,
+    "ordered-imports": false
+  },
+  "rulesDirectory": []
+}
