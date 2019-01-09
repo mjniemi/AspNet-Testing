@@ -57,9 +57,7 @@ export class StationSearch extends React.Component<{}, IState> {
             });
     }
 
-    /*
-     * Renders the initial layout, including the modal panel which is not shown unless opened.
-     */
+    // Renders the initial layout, including the modal panel which is not shown unless opened.
     public render() {
         const contents = this.state.contents;
 
@@ -130,17 +128,17 @@ export class StationSearch extends React.Component<{}, IState> {
         );
     }
 
+    // Opens Modal panel by setting it's state boolean.
     private openModal() {
         this.setState({ modalOpen: true });
     }
 
+    // Closes Modal panel by setting it's state boolean.
     private closeModal() {
         this.setState({ modalOpen: false });
     }
 
-    /*
-     * Calls the api to get train data by station code
-     */
+    // Calls the api to get train data by station code
     private trainDataFetch() {
         const content = <h3>Ladataan...</h3>;
 
@@ -162,16 +160,12 @@ export class StationSearch extends React.Component<{}, IState> {
             });
     }
 
-    /*
-     * Changes the selected station to the react state
-     */
+    // Changes the selected station to the react state
     private stationChange(e) {
         this.setState({ selectedStation: e.target.value });
     }
 
-    /*
-     * Renders the table of fetched train data
-     */
+    // Renders the table of fetched train data
     private renderTrainTable(trains) {
         if (trains.length < 1) {
             return (
@@ -225,9 +219,7 @@ export class StationSearch extends React.Component<{}, IState> {
         );
     }
 
-    /*
-     * Sets the clicked row's data as the data to show on the modal, and opens the modal panel
-     */
+    // Sets the clicked row's data as the data to show on the modal, and opens the modal panel
     private onClickRow(row) {
         this.setState({ modalData: row });
         this.openModal();

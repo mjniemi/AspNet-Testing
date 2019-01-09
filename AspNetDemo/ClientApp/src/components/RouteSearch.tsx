@@ -57,7 +57,7 @@ export class RouteSearch extends React.Component<{}, IState> {
 
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
-
+        
         fetch("api/Station/GetStations")
             .then((response) => response.json())
             .then((data) => {
@@ -70,9 +70,7 @@ export class RouteSearch extends React.Component<{}, IState> {
             });
     }
 
-    /*
-     * Renders the initial layout, including the modal panel which is not shown unless opened.
-     */
+    // Renders the initial layout, including the modal panel which is not shown unless opened.
     public render() {
         const contents = this.state.contents;
         const firstStation = this.state.firstSelectedStation;
@@ -191,30 +189,29 @@ export class RouteSearch extends React.Component<{}, IState> {
         );
     }
 
+    // Opens Modal panel by setting it's state boolean.
     private openModal() {
         this.setState({ modalOpen: true });
     }
 
+    // Closes Modal panel by setting it's state boolean.
     private closeModal() {
         this.setState({ modalOpen: false });
     }
 
-    /*
-     * Switches the station selections around
-     */
+    // Switches the station selections around.
     private switchStations() {
         const f = this.state.firstSelectedStation;
         const s = this.state.secondSelectedStation;
         this.setState({ firstSelectedStation: s, secondSelectedStation: f });
     }
 
+    // sets the state Date upon date selection from the date picker.
     private setDate(d) {
         this.setState({ date: d });
     }
 
-    /*
-     * Calls the api to get train data by station codes and date
-     */
+    // Calls the api to get train data by station codes and date
     private trainDataFetch() {
         const content = <h3>Ladataan...</h3>;
         let stations = this.state.firstSelectedStation;
@@ -245,18 +242,20 @@ export class RouteSearch extends React.Component<{}, IState> {
             });
     }
 
+    // sets the first station State upon it's selection change.
     private firstStationChange(e) {
         this.setState({ firstSelectedStation: e.target.value });
     }
 
+    // sets the second station State upon it's selection change.
     private secondStationChange(e) {
         this.setState({ secondSelectedStation: e.target.value });
     }
 
-    /*
-     * Renders the table of fetched train data
-     */
+    // Renders the table of fetched train data
     private renderTrainTable(trains) {
+
+        // If array has no data, returns a simple message div.
         if (trains.length < 1) {
             return (
                 <div>
@@ -310,9 +309,7 @@ export class RouteSearch extends React.Component<{}, IState> {
         );
     }
 
-    /*
-     * Sets the clicked row's data as the data to show on the modal, and opens the modal panel
-     */
+    // Sets the clicked row's data as the data to show on the modal, and opens the modal panel
     private onClickRow(row) {
         this.setState({ modalData: row });
         this.openModal();

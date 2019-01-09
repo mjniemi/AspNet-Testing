@@ -29,6 +29,7 @@ namespace AspNetDemo
                 configuration.RootPath = "ClientApp/build";
             });
 
+            // Swagger configuration parameters
             services.AddSwaggerGen(c =>
             {
                 c.IncludeXmlComments(string.Format(@"{0}\SwaggerApi.XML", System.AppDomain.CurrentDomain.BaseDirectory));
@@ -69,14 +70,15 @@ namespace AspNetDemo
             {
                 spa.Options.SourcePath = "ClientApp";
 
+                // Enabling swagger and setting up Endpoint
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("v1/swagger.json", "API v1");
+                });
+
                 if (env.IsDevelopment())
                 {
-                    app.UseSwagger();
-                    app.UseSwaggerUI(c =>
-                    {
-                        c.SwaggerEndpoint("v1/swagger.json", "API v1");
-                    });
-
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });

@@ -19,6 +19,7 @@ namespace AspNetDemo
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseUrls("http://0.0.0.0:26400;https://0.0.0.0:26401")
                 .UseStartup<Startup>();
     }
 }
