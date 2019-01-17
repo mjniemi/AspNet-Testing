@@ -33,7 +33,7 @@ namespace AspNetDemo.Controllers
             string apiUrl = "https://rata.digitraffic.fi/api/v1/live-trains/station/"
                 + station + "?arriving_trains=0&arrived_trains=0&departed_trains=0&departing_trains=3&include_nonstopping=false";
 
-            string data = GetTrains(apiUrl);
+            string data = GetExternalData(apiUrl);
 
             List<TrainData> TypedData = JsonConvert.DeserializeObject<List<TrainData>>(data);
             List<Train> parsedData = ParseTrainData(TypedData);
@@ -58,7 +58,7 @@ namespace AspNetDemo.Controllers
 
             string apiUrl = "https://rata.digitraffic.fi/api/v1/live-trains/station/" +stations
                              + "?departure_date=" + date;
-            string data = GetTrains(apiUrl);
+            string data = GetExternalData(apiUrl);
 
             if (!data.Contains("errorMessage"))
             {
@@ -70,6 +70,26 @@ namespace AspNetDemo.Controllers
             {
                 List<Train> parsedData = new List<Train>();
                 return parsedData;
+            }
+        }
+
+        [HttpGet("[action]")]
+        public TrainLocation GetLocation(string parameters)
+        {
+            List<TrainLocation> loc = new List<TrainLocation>();
+
+            string apiUrl = "https://rata.digitraffic.fi/api/v1/train-locations/latest/" + parameters;
+
+            string data = GetExternalData(apiUrl);
+
+            if (!data.Contains("errorMessage"))
+            {
+                loc = JsonConvert.DeserializeObject<List<TrainLocation>>(data);
+                return loc.First();
+            }
+            else
+            {
+                return new TrainLocation();
             }
         }
 
@@ -91,6 +111,7 @@ namespace AspNetDemo.Controllers
                     TrainType = train.TrainType,
                     TrainCategory = train.TrainCategory,
                     Cancelled = train.Cancelled,
+                    RunningCurrently = train.RunningCurrently,
                 };
 
                 TrainTravelData[] NewTable = train.TimetableRows;
@@ -243,7 +264,10 @@ namespace AspNetDemo.Controllers
                 {
                     newTrain.StartStation = newTrain.TimetableRows.First().StationName;
                     newTrain.EndStation = newTrain.TimetableRows.Last().StationName;
+                    newTrain.DepartureTime = newTrain.TimetableRows.First().ScheduledDepartureTime;
+                    newTrain.ArrivalTime = newTrain.TimetableRows.Last().ScheduledArrivalTime;
                 }
+                
                 parsedData.Add(newTrain);
 
             }
@@ -253,7 +277,7 @@ namespace AspNetDemo.Controllers
         /*
          * Handles the API fetch call to VR API 
          */
-        private string GetTrains(string url)
+        private string GetExternalData(string url)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             try

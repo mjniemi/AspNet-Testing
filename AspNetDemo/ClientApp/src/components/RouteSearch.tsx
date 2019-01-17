@@ -16,9 +16,43 @@ const modalStyles = {
     },
 };
 
+interface ITimetable {
+    cancelled: boolean;
+    commercialTrack: string;
+    scheduledArrivalTime: string;
+    scheduledDepartureTime: string;
+    stationShortCode: string;
+    stationName: string;
+    TrainReady: {};
+}
+
+interface ITrain {
+    trainNumber: number;
+    trainType: string;
+    trainCategory: string;
+    cancelled: boolean;
+    runningCurrently: boolean;
+    timetableRows: [];
+    startStation: string;
+    departureTime: string;
+    endStation: string;
+    arrivalTime: string;
+}
+
 interface IStation {
     stationName: string;
     stationShortCode: string;
+}
+
+interface ITrainLocation {
+    trainNumber: string;
+    departureDate: Date;
+    timestamp: string;
+    speed: number;
+    location: {
+        type: string;
+        coordinates: number[];
+    };
 }
 
 interface IState {
@@ -29,8 +63,9 @@ interface IState {
     isButtonDisabled: boolean;
     buttonText: string;
     contents: JSX.Element;
-    modalOpen: boolean;
-    modalData: [];
+    scheduleModalOpen: boolean;
+    scheduleModalData: [];
+    mapModalOpen: boolean;
 }
 
 Modal.setAppElement("#root");
@@ -48,8 +83,9 @@ export class RouteSearch extends React.Component<{}, IState> {
             isButtonDisabled: false,
             buttonText: "Hae",
             contents: <div></div>,
-            modalOpen: false,
-            modalData: [],
+            scheduleModalOpen: false,
+            scheduleModalData: [],
+            mapModalOpen: false,
         };
 
         this.switchStations = this.switchStations.bind(this);
@@ -149,7 +185,7 @@ export class RouteSearch extends React.Component<{}, IState> {
                 </div>
                 <br></br>
                 <div className="modalDiv">
-                    <Modal isOpen={this.state.modalOpen}
+                    <Modal isOpen={this.state.scheduleModalOpen}
                         onRequestClose={this.closeModal}
                         shouldCloseOnOverlayClick={true}
                         style={modalStyles}>
@@ -157,7 +193,7 @@ export class RouteSearch extends React.Component<{}, IState> {
                             <button className="roundedButton" onClick={this.closeModal}>Sulje</button>
                             <br></br>
                             <ReactTable
-                                data={this.state.modalData}
+                                data={this.state.scheduleModalData}
                                 columns={[
                                     {
                                         Header: "Asema",
@@ -191,12 +227,12 @@ export class RouteSearch extends React.Component<{}, IState> {
 
     // Opens Modal panel by setting it's state boolean.
     private openModal() {
-        this.setState({ modalOpen: true });
+        this.setState({ scheduleModalOpen: true });
     }
 
     // Closes Modal panel by setting it's state boolean.
     private closeModal() {
-        this.setState({ modalOpen: false });
+        this.setState({ scheduleModalOpen: false });
     }
 
     // Switches the station selections around.
@@ -237,7 +273,7 @@ export class RouteSearch extends React.Component<{}, IState> {
 
         fetch("api/Train/GetRouteData?parameters=" + stations + "_" + date)
             .then((response) => response.json())
-            .then((data) => {
+            .then((data: ITrain[]) => {
                 this.setState({ contents: this.renderTrainTable(data) });
             });
     }
@@ -253,8 +289,8 @@ export class RouteSearch extends React.Component<{}, IState> {
     }
 
     // Renders the table of fetched train data
-    private renderTrainTable(trains) {
-
+    private renderTrainTable(trains: ITrain[]) {
+        
         // If array has no data, returns a simple message div.
         if (trains.length < 1) {
             return (
@@ -263,7 +299,7 @@ export class RouteSearch extends React.Component<{}, IState> {
                 </div>
             );
         }
-
+        console.log(trains);
         return (
             <div>
                 <ReactTable
@@ -272,25 +308,39 @@ export class RouteSearch extends React.Component<{}, IState> {
                         {
                             Header: "Junan numero",
                             accessor: "trainNumber",
+                            
                         },
                         {
-                            Header: "Junan tyyppi",
-                            accessor: "trainType",
-                        },
-                        {
-                            Header: "Junan kategoria",
-                            accessor: "trainCategory",
+                            Header: "Sijainti",
+                            accessor: "runningCurrently",
+                            Cell: ({ row }) => (
+                                <div>
+                                    {row.runningCurrently &&
+                                        <button className="roundedButton"
+                                            onClick={(event) => this.onClickLocation(row.trainNumber)}>
+                                            Sijainti
+                                        </button>}
+                                </div>
+                            ),
                         },
                         {
                             Header: "Lähtöasema",
                             accessor: "startStation",
                         },
                         {
+                            Header: "Lähtöaika",
+                            accessor: "departureTime",
+                        },
+                        {
+                            Header: "Saapumisaika",
+                            accessor: "arrivalTime",
+                        },
+                        {
                             Header: "Pääteasema",
                             accessor: "endStation",
                         },
                         {
-                            Header: "Matkan kulku",
+                            Header: "Aikataulu",
                             id: "timetableRows",
                             accessor: "timetableRows",
                             Cell: ({ row }) => (
@@ -311,7 +361,18 @@ export class RouteSearch extends React.Component<{}, IState> {
 
     // Sets the clicked row's data as the data to show on the modal, and opens the modal panel
     private onClickRow(row) {
-        this.setState({ modalData: row });
+        this.setState({ scheduleModalData: row });
         this.openModal();
+    }
+
+    private onClickLocation(trainNumber) {
+        console.log("num:" + trainNumber);
+        fetch("api/Train/GetLocation?parameters=" + trainNumber)
+            .then((response) => response.json())
+            .then((data: ITrainLocation) => {
+                let lng = data.location.coordinates[0];
+                let lat = data.location.coordinates[1];
+                window.open("https://www.google.com/maps/search/?api=1&query=" + lat + "," + lng);
+            });
     }
 }

@@ -185,23 +185,23 @@ export class StationSearch extends React.Component<{}, IState> {
                         accessor: "trainNumber",
                     },
                     {
-                        Header: "Junan tyyppi",
-                        accessor: "trainType",
-                    },
-                    {
-                        Header: "Junan kategoria",
-                        accessor: "trainCategory",
-                    },
-                    {
                         Header: "Lähtöasema",
                         accessor: "startStation",
+                    },
+                    {
+                        Header: "Lähtöaika",
+                        accessor: "departureTime",
+                    },
+                    {
+                        Header: "Saapumisaika",
+                        accessor: "arrivalTime",
                     },
                     {
                         Header: "Pääteasema",
                         accessor: "endStation",
                     },
                     {
-                        Header: "Matkan kulku",
+                        Header: "Aikataulu",
                         id: "timetableRows",
                         accessor: "timetableRows",
                         Cell: ({ row }) => (

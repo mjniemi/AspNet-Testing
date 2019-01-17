@@ -10,6 +10,7 @@
     "ajv": "^6.6.2",
     "babel-core": "^6.26.3",
     "bootstrap": "^3.4.0",
+    "gmaps.core": "^0.5.1",
     "react": "^16.7.0",
     "react-bootstrap": "^0.31.5",
     "react-date-picker": "^7.1.1",
