@@ -73,6 +73,14 @@ namespace AspNetDemo.Controllers
             }
         }
 
+        /// <summary>
+        /// Get Location
+        /// </summary>
+        /// <remarks>
+        /// Fetches the train's coordinates from digitraffic API
+        /// </remarks>
+        /// <param name="parameters">Train number</param>
+        /// <returns>Object containing train coordinates</returns>
         [HttpGet("[action]")]
         public TrainLocation GetLocation(string parameters)
         {

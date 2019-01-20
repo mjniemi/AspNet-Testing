@@ -365,6 +365,7 @@ export class RouteSearch extends React.Component<{}, IState> {
         this.openModal();
     }
 
+    // Calls the api to fetch the train coordinates to show on google maps. Map is shown in a new window.
     private onClickLocation(trainNumber) {
         console.log("num:" + trainNumber);
         fetch("api/Train/GetLocation?parameters=" + trainNumber)
