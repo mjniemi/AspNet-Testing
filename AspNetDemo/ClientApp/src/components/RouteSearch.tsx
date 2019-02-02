@@ -57,7 +57,6 @@ interface ITrainLocation {
 
 interface IState {
     stations: IStation[];
-    firstSelectedStation: string;
     secondSelectedStation: string;
     date: Date;
     isButtonDisabled: boolean;
@@ -68,16 +67,21 @@ interface IState {
     mapModalOpen: boolean;
 }
 
+interface IProps {
+    selectedStation: string;
+    setSelected: Function;
+}
+
 Modal.setAppElement("#root");
 
-export class RouteSearch extends React.Component<{}, IState> {
+export class RouteSearch extends React.Component<IProps, IState> {
     public displayName = "Reittihaku";
 
     constructor(props) {
         super(props);
+
         this.state = {
             stations: [],
-            firstSelectedStation: "",
             secondSelectedStation: "",
             date: new Date(),
             isButtonDisabled: false,
@@ -97,10 +101,12 @@ export class RouteSearch extends React.Component<{}, IState> {
         fetch("api/Station/GetStations")
             .then((response) => response.json())
             .then((data) => {
+                if (this.props.selectedStation == "") {
+                    this.props.setSelected(data[0].stationShortCode);
+                }
                 this.setState(
                     {
                         stations: data,
-                        firstSelectedStation: data[0].stationShortCode,
                         secondSelectedStation: data[0].stationShortCode,
                     });
             });
@@ -109,7 +115,7 @@ export class RouteSearch extends React.Component<{}, IState> {
     // Renders the initial layout, including the modal panel which is not shown unless opened.
     public render() {
         const contents = this.state.contents;
-        const firstStation = this.state.firstSelectedStation;
+        const firstStation = this.props.selectedStation;
         const secondStation = this.state.secondSelectedStation;
 
         return (
@@ -237,9 +243,10 @@ export class RouteSearch extends React.Component<{}, IState> {
 
     // Switches the station selections around.
     private switchStations() {
-        const f = this.state.firstSelectedStation;
+        const f = this.props.selectedStation;
         const s = this.state.secondSelectedStation;
-        this.setState({ firstSelectedStation: s, secondSelectedStation: f });
+        this.props.setSelected(s);
+        this.setState({ secondSelectedStation: f });
     }
 
     // sets the state Date upon date selection from the date picker.
@@ -250,7 +257,7 @@ export class RouteSearch extends React.Component<{}, IState> {
     // Calls the api to get train data by station codes and date
     private trainDataFetch() {
         const content = <h3>Ladataan...</h3>;
-        let stations = this.state.firstSelectedStation;
+        let stations = this.props.selectedStation;
         stations = stations + "/" + this.state.secondSelectedStation;
         let date: string = this.state.date.getFullYear().toString();
         let month: string = "" + this.state.date.getMonth() + 1;
@@ -280,7 +287,7 @@ export class RouteSearch extends React.Component<{}, IState> {
 
     // sets the first station State upon it's selection change.
     private firstStationChange(e) {
-        this.setState({ firstSelectedStation: e.target.value });
+        this.props.setSelected(e.target.value);
     }
 
     // sets the second station State upon it's selection change.

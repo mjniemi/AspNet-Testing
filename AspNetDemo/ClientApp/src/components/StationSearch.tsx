@@ -20,9 +20,13 @@ interface IStation {
     stationShortCode: string;
 }
 
+interface IProps {
+    selectedStation: string;
+    setSelected: Function;
+}
+
 interface IState {
     stations: IStation[];
-    selectedStation: string;
     isButtonDisabled: boolean;
     buttonText: string;
     contents: JSX.Element;
@@ -32,14 +36,14 @@ interface IState {
 
 Modal.setAppElement("#root");
 
-export class StationSearch extends React.Component<{}, IState> {
+export class StationSearch extends React.Component<IProps, IState> {
     public displayName = "Asemahaku";
 
     constructor(props) {
         super(props);
+
         this.state = {
             stations: [],
-            selectedStation: "",
             isButtonDisabled: false,
             buttonText: "Hae",
             contents: <div></div>,
@@ -53,7 +57,10 @@ export class StationSearch extends React.Component<{}, IState> {
         fetch("api/Station/GetStations")
             .then((response) => response.json())
             .then((data) => {
-                this.setState({ stations: data, selectedStation: data[0].stationShortCode });
+                if (this.props.selectedStation == "") {
+                    this.props.setSelected(data[0].stationShortCode);
+                }
+                this.setState({ stations: data });
             });
     }
 
@@ -70,7 +77,9 @@ export class StationSearch extends React.Component<{}, IState> {
                     </div>
                     <div className="controlsDiv">
 
-                        <select name="stations-list" onChange={this.stationChange.bind(this)} >
+                        <select name="stations-list"
+                            value={this.props.selectedStation}
+                            onChange={this.stationChange.bind(this)} >
                             {this.state.stations.map((station) =>
                                 <option key={station.stationShortCode}
                                     value={station.stationShortCode}>{station.stationName}</option>,
@@ -142,7 +151,7 @@ export class StationSearch extends React.Component<{}, IState> {
     private trainDataFetch() {
         const content = <h3>Ladataan...</h3>;
 
-        const stationCode = this.state.selectedStation;
+        const stationCode = this.props.selectedStation;
         this.setState({
             isButtonDisabled: true,
             buttonText: "Ladataan",
@@ -162,7 +171,7 @@ export class StationSearch extends React.Component<{}, IState> {
 
     // Changes the selected station to the react state
     private stationChange(e) {
-        this.setState({ selectedStation: e.target.value });
+        this.props.setSelected(e.target.value);
     }
 
     // Renders the table of fetched train data
